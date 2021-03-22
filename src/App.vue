@@ -45,9 +45,30 @@
 
       <template v-if="tickers.length">
         <hr class="w-full border-t border-gray-600 my-4" />
+        <div class="max-w-xs">
+          <button
+            class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          >
+            Назад
+          </button>
+          <button
+            class="ml-2 my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          >
+            Вперед
+          </button>
+          <div class="mt-1 relative rounded-md shadow-md">
+            Фильтр:
+            <input
+              v-model="filter"
+              type="text"
+              class="block w-full pr-10 border-gray-300 text-gray-900 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
+            />
+          </div>
+        </div>
+        <hr class="w-full border-t border-gray-600 my-4" />
         <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
           <div
-            v-for="t in tickers"
+            v-for="t in filteredTickets()"
             :key="t.name"
             @click="select(t)"
             :class="{ 'border-4': selected === t }"
@@ -142,6 +163,8 @@ export default {
       tickers: [],
       selected: null,
       graph: [],
+      page: 1,
+      filter: "",
     };
   },
 
@@ -155,16 +178,19 @@ export default {
   },
 
   methods: {
+    filteredTickets() {
+      return this.tickers.filter((ticker) => ticker.name.includes(this.filter));
+    },
+
     subscribeToUpdates(tickerName) {
       setInterval(async () => {
         const f = await fetch(
-            `https://min-api.cryptocompare.com/data/price?fsym=${tickerName}&tsyms=USD&api_key=${API_KEY}`
+          `https://min-api.cryptocompare.com/data/price?fsym=${tickerName}&tsyms=USD&api_key=${API_KEY}`
         );
         const data = await f.json();
         const { USD } = data;
-        this.tickers.find(
-            (ticker) => ticker.name === tickerName
-        ).price = USD > 1 ? USD.toFixed(2) : USD.toPrecision(2);
+        this.tickers.find((ticker) => ticker.name === tickerName).price =
+          USD > 1 ? USD.toFixed(2) : USD.toPrecision(2);
 
         if (this.selected?.name === tickerName) {
           this.graph.push(USD);
