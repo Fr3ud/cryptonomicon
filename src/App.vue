@@ -174,6 +174,13 @@ export default {
   },
 
   created() {
+    const windowData = Object.fromEntries(
+      new URL(window.location).searchParams.entries()
+    );
+
+    if (windowData.filter) this.filter = windowData.filter;
+    if (windowData.page) this.page = parseInt(windowData.page, 10);
+
     const tickersData = localStorage.getItem("cryptonomicon-list");
 
     if (tickersData) {
@@ -249,6 +256,24 @@ export default {
   watch: {
     filter() {
       this.page = 1;
+
+      const { pathname } = window.location;
+
+      window.history.pushState(
+        null,
+        document.title,
+        `${pathname}?filter=${this.filter}&page=${this.page}`
+      );
+    },
+
+    page() {
+      const { pathname } = window.location;
+
+      window.history.pushState(
+        null,
+        document.title,
+        `${pathname}?filter=${this.filter}&page=${this.page}`
+      );
     },
   },
 };
