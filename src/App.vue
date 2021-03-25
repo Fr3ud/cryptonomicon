@@ -221,6 +221,13 @@ export default {
         (price) => 5 + ((price - minValue) * 95) / (maxValue - minValue)
       );
     },
+
+    pageStateOptions() {
+      return {
+        filter: this.filter,
+        page: this.page,
+      };
+    },
   },
 
   methods: {
@@ -280,23 +287,16 @@ export default {
 
     filter() {
       this.page = 1;
-
-      const { pathname } = window.location;
-
-      window.history.pushState(
-        null,
-        document.title,
-        `${pathname}?filter=${this.filter}&page=${this.page}`
-      );
     },
 
-    page() {
+    pageStateOptions(value) {
       const { pathname } = window.location;
+      const { filter, page } = value;
 
       window.history.pushState(
         null,
         document.title,
-        `${pathname}?filter=${this.filter}&page=${this.page}`
+        `${pathname}?filter=${filter}&page=${page}`
       );
     },
   },
