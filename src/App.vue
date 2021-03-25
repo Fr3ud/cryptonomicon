@@ -156,7 +156,7 @@
 </template>
 
 <script>
-import API_KEY from "../config";
+import { loadTicker } from "./api";
 
 export default {
   name: "App",
@@ -182,7 +182,7 @@ export default {
     // if (windowData.filter) this.filter = windowData.filter;
     // if (windowData.page) this.page = parseInt(windowData.page, 10);
 
-    const VALID_KEYS = ['filter', 'page'];
+    const VALID_KEYS = ["filter", "page"];
 
     VALID_KEYS.forEach((key) => {
       if (windowData[key]) {
@@ -243,11 +243,9 @@ export default {
   methods: {
     subscribeToUpdates(tickerName) {
       setInterval(async () => {
-        const f = await fetch(
-          `https://min-api.cryptocompare.com/data/price?fsym=${tickerName}&tsyms=USD&api_key=${API_KEY}`
-        );
-        const data = await f.json();
-        const { USD } = data;
+        const exchangeData = await loadTicker(tickerName);
+        const { USD } = exchangeData;
+
         this.tickers.find((ticker) => ticker.name === tickerName).price =
           USD > 1 ? USD.toFixed(2) : USD.toPrecision(2);
 
