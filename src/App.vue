@@ -75,7 +75,7 @@
             v-for="t in paginatedTickers"
             :key="t.name"
             @click="select(t)"
-            :class="{ 'border-4': selected === t }"
+            :class="{ 'border-4': selectedTicker === t }"
             class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer"
           >
             <div class="px-4 py-5 sm:p-6 text-center">
@@ -111,9 +111,9 @@
         <hr class="w-full border-t border-gray-600 my-4" />
       </template>
 
-      <section v-if="selected" class="relative">
+      <section v-if="selectedTicker" class="relative">
         <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
-          {{ selected.name }} - USD
+          {{ selectedTicker.name }} - USD
         </h3>
         <div class="flex items-end border-gray-600 border-b border-l h-64">
           <div
@@ -124,7 +124,7 @@
           ></div>
         </div>
         <button
-          @click="selected = null"
+          @click="selectedTicker = null"
           type="button"
           class="absolute top-0 right-0"
         >
@@ -165,7 +165,7 @@ export default {
     return {
       ticker: "",
       tickers: [],
-      selected: null,
+      selectedTicker: null,
       graph: [],
       page: 1,
       filter: "",
@@ -234,7 +234,7 @@ export default {
         this.tickers.find((ticker) => ticker.name === tickerName).price =
           USD > 1 ? USD.toFixed(2) : USD.toPrecision(2);
 
-        if (this.selected?.name === tickerName) {
+        if (this.selectedTicker?.name === tickerName) {
           this.graph.push(USD);
         }
       }, 3000);
@@ -256,16 +256,26 @@ export default {
     },
 
     select(ticker) {
-      this.selected = ticker;
+      this.selectedTicker = ticker;
       this.graph = [];
     },
 
     handleDelete(tickerToRemove) {
       this.tickers = this.tickers.filter((ticker) => ticker !== tickerToRemove);
+
+      if (this.selectedTicker === tickerToRemove) {
+        this.selectedTicker = null;
+      }
     },
   },
 
   watch: {
+    paginatedTickers() {
+      if (this.paginatedTickers.length === 0 && this.page > 1) {
+        this.page -= 1;
+      }
+    },
+
     filter() {
       this.page = 1;
 
