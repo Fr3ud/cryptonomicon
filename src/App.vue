@@ -247,12 +247,10 @@ export default {
         price: "",
       };
 
-      this.tickers.push(currentTicker);
-
-      localStorage.setItem("cryptonomicon-list", JSON.stringify(this.tickers));
+      this.tickers = [...this.tickers, currentTicker];
+      this.filter = "";
 
       this.subscribeToUpdates(currentTicker.name);
-      this.filter = "";
     },
 
     select(ticker) {
@@ -270,6 +268,10 @@ export default {
   },
 
   watch: {
+    tickers() {
+      localStorage.setItem("cryptonomicon-list", JSON.stringify(this.tickers));
+    },
+
     paginatedTickers() {
       if (this.paginatedTickers.length === 0 && this.page > 1) {
         this.page -= 1;
