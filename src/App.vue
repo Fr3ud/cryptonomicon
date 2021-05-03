@@ -194,8 +194,9 @@ export default {
 
     if (tickersData) {
       this.tickers = JSON.parse(tickersData);
-      this.tickers.forEach((ticker) => this.subscribeToUpdates(ticker.name));
     }
+
+    setInterval(this.updateTickers, 5000);
   },
 
   computed: {
@@ -241,19 +242,25 @@ export default {
   },
 
   methods: {
-    subscribeToUpdates(tickerName) {
-      setInterval(async () => {
-        const exchangeData = await loadTicker(tickerName);
-        const { USD } = exchangeData;
+    async updateTickers() {
+      if (!this.tickers.length) return;
 
-        this.tickers.find((ticker) => ticker.name === tickerName).price =
-          USD > 1 ? USD.toFixed(2) : USD.toPrecision(2);
+      const exchangeData = await loadTicker(
+        this.tickers.map((ticker) => ticker.name)
+      );
 
-        if (this.selectedTicker?.name === tickerName) {
-          this.graph.push(USD);
-        }
-      }, 3000);
-      this.ticker = "";
+      this.tickers.forEach((ticker) => {
+        ticker.price = exchangeData[ticker.name.toUpperCase()];
+      });
+
+      // const { USD } = exchangeData;
+
+      // this.tickers.find((ticker) => ticker.name === tickerName).price =
+      //   USD > 1 ? USD.toFixed(2) : USD.toPrecision(2);
+      //
+      // if (this.selectedTicker?.name === tickerName) {
+      //   this.graph.push(USD);
+      // }
     },
 
     add() {
@@ -264,8 +271,6 @@ export default {
 
       this.tickers = [...this.tickers, currentTicker];
       this.filter = "";
-
-      this.subscribeToUpdates(currentTicker.name);
     },
 
     select(ticker) {
